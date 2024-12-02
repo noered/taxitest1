@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Webpage</title>
+    <style>
+        body {
+            margin: 0;
+            position: relative;
+            background-color: #000; /* 防止图片透明时的背景色 */
+            font-family: "Times New Roman", serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100vh;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 背景图片层 */
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('your-image.jpg'); /* 替换为您的图片路径或 URL */
+            background-size: cover; /* 确保图片覆盖整个屏幕 */
+            background-position: center; /* 居中显示图片 */
+            background-repeat: no-repeat; /* 防止图片重复 */
+            opacity: 0.6; /* 设置背景图片透明度为60% */
+            z-index: -1; /* 确保背景在内容后面 */
+        }
+
+        /* 内容样式 */
+        #content {
+            z-index: 1;
+            font-size: 48px; /* 字体大小缩小为原来的三分之二 */
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.33; /* 行间距设置为字体大小的1.33倍 */
+            background-color: rgba(255, 255, 255, 0.8); /* 添加白色半透明背景，提升文字可读性 */
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            border: 1px solid black;
+            border-radius: 5px;
+            background-color: white;
+        }
+        button:hover {
+            background-color: #d3d3d3;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景图片层 -->
+    <div class="background"></div>
+    
+    <!-- 内容层 -->
+    <div id="content"></div>
+    
+    <script>
+        const content = document.getElementById('content');
+
+        // 定义每步内容
+        const steps = [
+            { text: ["Hi,", "It’s very nice to meet you here,", "my friend!"], delay: 0 },
+            { text: ["I am your taxi driver Paul.", "Before we begin our journey, let me know you a little bit for better services."], delay: 0 },
+            { 
+                text: ["I would like to know.", "Are you in a hurry?", "Like, you have to be at your destination by a certain time?"],
+                options: ["Yes, I have a hurry.", "No, I am flexible."]
+            },
+            { 
+                text: ["Great!", "Would you like some music with your journey?"],
+                options: ["Yes, I love to have music with my journey.", "No, I do not."]
+            },
+            { 
+                text: ["Fantastic.", "Would you like quiet music or lively music?"],
+                options: ["Quiet music.", "Lively music."],
+                condition: "Yes, I love to have music with my journey."
+            },
+            { 
+                text: ["Got it.", "I will keep quiet all the time for your journey."],
+                condition: "No, I do not."
+            },
+            { 
+                text: ["Sure!", "So let’s begin our journey.", "If you have any question then, please don’t hesitate to tell me during the journey!"], 
+                delay: 5000, 
+                end: true 
+            }
+        ];
+
+        // 当前步骤计数
+        let stepIndex = 0;
+
+        function typeEffect(sentence, callback) {
+            let paragraph = document.createElement("p");
+            content.appendChild(paragraph);
+
+            let charIndex = 0;
+            function typeChar() {
+                if (charIndex < sentence.length) {
+                    paragraph.textContent += sentence[charIndex];
+                    charIndex++;
+                    setTimeout(typeChar, 100); // 每个字符出现间隔0.1秒
+                } else {
+                    callback(); // 当前句子完成后执行回调
+                }
+            }
+            typeChar();
+        }
+
+        function typeParagraphEffect(lines, callback) {
+            let lineIndex = 0;
+
+            function typeNextLine() {
+                if (lineIndex < lines.length) {
+                    typeEffect(lines[lineIndex], () => {
+                        lineIndex++;
+                        setTimeout(typeNextLine, 500); // 每行完成后间隔0.5秒
+                    });
+                } else {
+                    callback(); // 当前段落完成后执行回调
+                }
+            }
+            typeNextLine();
+        }
+
+        function nextStep(choice) {
+            content.innerHTML = ''; // 清空内容
+
+            // 获取当前步骤
+            const step = steps[stepIndex];
+
+            // 如果有条件，且条件不满足，跳过
+            if (step.condition && step.condition !== choice) {
+                stepIndex++;
+                nextStep(choice);
+                return;
+            }
+
+            // 如果是最后一步
+            if (step.end) {
+                typeParagraphEffect(step.text, () => {
+                    setTimeout(() => window.close(), step.delay); // 自动关闭页面
+                });
+                return;
+            }
+
+            // 显示文字逐字逐段
+            if (step.text) {
+                typeParagraphEffect(step.text, () => {
+                    if (step.options) {
+                        // 如果有按钮选项
+                        step.options.forEach(option => {
+                            const button = document.createElement('button');
+                            button.textContent = option;
+                            button.onclick = () => {
+                                stepIndex++;
+                                nextStep(option);
+                            };
+                            content.appendChild(button);
+                        });
+                    } else {
+                        // 添加 "Next" 按钮
+                        const nextButton = document.createElement('button');
+                        nextButton.textContent = "Next";
+                        nextButton.onclick = () => {
+                            stepIndex++;
+                            nextStep(choice);
+                        };
+                        content.appendChild(nextButton);
+                    }
+                });
+            }
+        }
+
+        // 启动第一步
+        nextStep();
+    </script>
+</body>
+</html>
