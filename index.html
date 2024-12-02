@@ -37,10 +37,10 @@
         /* 内容样式 */
         #content {
             z-index: 1;
-            font-size: 48px; /* 字体大小缩小为原来的三分之二 */
+            font-size: 24px; /* 调整字体大小为原来的50% */
             font-weight: bold;
             margin-bottom: 20px;
-            line-height: 1.33; /* 行间距设置为字体大小的1.33倍 */
+            line-height: 1.33; /* 行间距保持不变 */
             background-color: rgba(255, 255, 255, 0.8); /* 添加白色半透明背景，提升文字可读性 */
             padding: 20px;
             border-radius: 10px;
@@ -50,7 +50,7 @@
             display: block;
             margin: 20px auto;
             padding: 10px 20px;
-            font-size: 1rem;
+            font-size: 0.5rem; /* 调整按钮字体大小为原来的50% */
             cursor: pointer;
             border: 1px solid black;
             border-radius: 5px;
@@ -94,7 +94,7 @@
             },
             { 
                 text: ["Sure!", "So let’s begin our journey.", "If you have any question then, please don’t hesitate to tell me during the journey!"], 
-                delay: 5000, 
+                delay: 0, 
                 end: true 
             }
         ];
@@ -151,7 +151,13 @@
             // 如果是最后一步
             if (step.end) {
                 typeParagraphEffect(step.text, () => {
-                    setTimeout(() => window.close(), step.delay); // 自动关闭页面
+                    // 显示结束按钮
+                    const endButton = document.createElement('button');
+                    endButton.textContent = "Back to Previous Page";
+                    endButton.onclick = () => {
+                        window.history.back(); // 返回上一页
+                    };
+                    content.appendChild(endButton);
                 });
                 return;
             }
